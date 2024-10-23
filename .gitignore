@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+/frontend/node_modules/
+venv/
+
+# Environment variables
+.env
+
+# Build files
+/frontend/build/
+
+# Cache
+__pycache__/
+*.pyc
+
+# IDE specific files
+.vscode/
+*.swp
+.DS_Store
