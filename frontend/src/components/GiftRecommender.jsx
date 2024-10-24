@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GiftCard } from './GiftCard';
 import { GiftForm } from './GiftForm';
-import { parseRecommendations } from './utils';
+import { parseRecommendations, saveFavorites, loadFavorites } from './utils';
 
 export const GiftRecommender = () => {
   const [isCoalMode, setIsCoalMode] = useState(false);
@@ -11,6 +11,14 @@ export const GiftRecommender = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showFavorites, setShowFavorites] = useState(false);
+
+  useEffect(() => {
+    const savedFavorites = loadFavorites();
+    if (savedFavorites.length > 0) {
+      setFavorites(savedFavorites);
+    }
+  }, []);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,9 +64,11 @@ export const GiftRecommender = () => {
   const handleFavorite = (gift) => {
     setFavorites(prevFavorites => {
       const isAlreadyFavorite = prevFavorites.some(fav => fav.id === gift.id);
-      return isAlreadyFavorite
+      const newFavorites = isAlreadyFavorite
         ? prevFavorites.filter(fav => fav.id !== gift.id)
         : [...prevFavorites, gift];
+        saveFavorites(newFavorites);
+      return newFavorites;
     });
   };
 
