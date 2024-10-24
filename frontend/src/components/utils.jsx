@@ -12,3 +12,20 @@ export const parseRecommendations = (text) => {
       };
     });
   };
+  export const saveFavorites = (favorites) => {
+    try {
+      localStorage.setItem('giftFavorites', JSON.stringify(favorites));
+    } catch (error) {
+      console.error('Error saving favorites:', error);
+    }
+  };
+  
+  export const loadFavorites = () => {
+    try {
+      const favorites = localStorage.getItem('giftFavorites');
+      return favorites ? JSON.parse(favorites) : [];
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+      return [];
+    }
+  };
