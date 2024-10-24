@@ -1,4 +1,6 @@
-import GiftRecommender from './GiftRecommender';
+// STEP 3: src/App.js
+import React from 'react';
+import { GiftRecommender } from './components/GiftRecommender';
 
 function App() {
   return (
