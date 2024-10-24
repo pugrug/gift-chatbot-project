@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { GiftCard } from './GiftCard';
 import { GiftForm } from './GiftForm';
-import { parseRecommendations, saveFavorites, loadFavorites } from './utils';
+import { 
+  parseRecommendations, 
+  validateApiResponse,
+  loadFavorites,
+  saveFavorites 
+} from './utils';
 
 export const GiftRecommender = () => {
   const [isCoalMode, setIsCoalMode] = useState(false);
@@ -24,12 +29,22 @@ export const GiftRecommender = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
+  
     try {
       const coalPrompt = isCoalMode 
-        ? `Give me slightly disappointing, humorous gift ideas for someone who ${input}. Make them funny but still somewhat relevant. Format each gift suggestion with a slightly sarcastic description. Keep the price ranges realistic but make them seem less appealing.`
-        : input;
-
+        ? `You are a snarky gift recommender. Give me 3-4 slightly disappointing but funny gift suggestions for someone who ${input}. For each gift:
+           1. Start with "Gift Suggestion X:"
+           2. Give it a short memorable name
+           3. Include a price range ($XX-XX format)
+           4. Add a slightly sarcastic but relevant description
+           Keep prices realistic but make items seem less appealing.`
+        : `You are a thoughtful gift recommender. Give me 3-4 creative gift suggestions for someone who ${input}. For each gift:
+           1. Start with "Gift Suggestion X:"
+           2. Give it a short memorable name
+           3. Include a price range ($XX-XX format)
+           4. Add an enthusiastic, detailed description
+           Focus on unique and personalized suggestions.`;
+  
       const response = await fetch('http://localhost:5000/api/recommendations', {
         method: 'POST',
         headers: {
@@ -37,24 +52,26 @@ export const GiftRecommender = () => {
         },
         body: JSON.stringify({ prompt: coalPrompt }),
       });
-
+  
       const data = await response.json();
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to get recommendations');
       }
-
-      const recommendations = data.recommendations;
-      const formattedRecommendations = typeof recommendations === 'string'
-        ? parseRecommendations(recommendations)
-        : parseRecommendations(recommendations.join(' '));
-
+  
+      const validatedResponse = validateApiResponse(data);
+      const formattedRecommendations = parseRecommendations(validatedResponse);
+  
+      if (formattedRecommendations.length === 0) {
+        throw new Error('No valid recommendations generated');
+      }
+  
       setRecommendations(formattedRecommendations);
     } catch (err) {
       console.error('Error:', err);
       setError(isCoalMode 
         ? '🪨 Even the coal ran out! Please try again!' 
-        : 'Oops! Something went wrong. Please try again!');
+        : '🎄 The elves are taking a cookie break! Please try again!');
       setRecommendations([]);
     } finally {
       setIsLoading(false);
